@@ -1,0 +1,3 @@
+cd 4-4-options
+g++ *.cpp 4-2-calculator/*.cpp 4-3-triangle/*.cpp -o options.exe
+./options.exe

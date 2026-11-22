@@ -1,0 +1,3 @@
+cd 4-6-studentStruct
+g++ *.cpp -o student.exe
+./student

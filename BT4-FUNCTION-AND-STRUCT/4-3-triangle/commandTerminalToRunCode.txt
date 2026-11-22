@@ -1,0 +1,3 @@
+cd 4-3-triangle
+g++ *.cpp -o triangle.exe
+./triangle.exe
