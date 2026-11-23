@@ -11,34 +11,21 @@ using namespace std;
 
 bool is_equal(const Fraction& first_fraction,
               const Fraction& second_fraction){
-    if (first_fraction.denominator*second_fraction.numerator == first_fraction.numerator*second_fraction.denominator){
-        return 1;
-    } else {
-        return 0;    
-    }
+    return first_fraction.denominator*second_fraction.numerator == first_fraction.numerator*second_fraction.denominator;
 }
 
 bool is_greater(const Fraction& first_fraction,
                 const Fraction& second_fraction){
-    if (first_fraction.numerator*second_fraction.denominator>second_fraction.numerator*first_fraction.denominator){
-        return 1;
-    } else {
-        return 0;
-    }
+    return first_fraction.numerator*second_fraction.denominator>second_fraction.numerator*first_fraction.denominator;
 }   
                 
 bool is_less(const Fraction& first_fraction,
              const Fraction& second_fraction){
-    if (first_fraction.numerator*second_fraction.denominator<second_fraction.numerator*first_fraction.denominator){
-        return 1;
-    } else {
-        return 0;
-    }             
+    return first_fraction.numerator*second_fraction.denominator<second_fraction.numerator*first_fraction.denominator;   
 }
              
-void auto_test_fraction(
-    std::string input_file_name,
-    std::string output_file_name){
+void auto_test_fraction(string input_file_name,string output_file_name){
+    int err=0;
     ifstream fin(input_file_name);
     string line;
     int t;
@@ -48,76 +35,75 @@ void auto_test_fraction(
         } else {
             cout<<"Khong hop le."<<endl;
         }
-
     } else {
         cerr<<"Khong the mo tep "<<input_file_name<<endl;
-        return 1;    
+        return;    
     }
-    
+    char op;
+    fin>>op; fin.ignore();
+    ofstream fout(output_file_name);
     for (int i=0;i<t;i++){
-        char c;
-        getline(fin,ss);        
-        ss>>c;
-        Fraction res;
-        switch (c)
-        {
-        case '+':
-            int i=0;
-            string op;
-            getline(fin, op);
-            while (!op.empty() && (op.back() == '\r' || op.back() == ' ' || op.back() == '\n')) {
-                op.pop_back();
+        int count =0;
+        Fraction fracs[6];
+        getline(fin,line);
+        if (line ==" \t\r\n") continue;
+        stringstream ss(line);
+        if (op == '+' or op=='-' or op=='*' or op=='/'){
+            string fraci;
+            while (getline(ss,fraci,',')){
+                if (fraci==" \t\r\n") break;
+                stringstream fraci_ss(fraci);
+                string de, num="";
+                getline(fraci_ss,num,'/');
+                getline(fraci_ss,de);
+                if (num=="") break;
+                cout<<"op "<<err++<<endl;
+                fracs[count].numerator=stoi(num);
+                fracs[count].denominator=stoi(de);
+                count++;
             }
-            Fraction old={0,1};
-            Fraction fs[6];
-            string fraction;
-            while (getline(fin, fraction, ',')){
-                fs[i]=parse_fraction_from_string(fraction);
-                old = sum_fraction(old, fs[i]);
-                i++;
+            for (int j=1;j<count;j++){
+                if (op=='+'){
+                    fracs[0]=sum_fraction(fracs[0], fracs[j]);
+                } else if (op =='-') {
+                    fracs[0]=minus_fraction(fracs[0], fracs[j]);
+                } else if (op=='*'){
+                    fracs[0]=multiply_fraction(fracs[0], fracs[j]);
+                } else {
+                    fracs[0]=divide_fraction(fracs[0], fracs[j]);
+                }
             }
-            res=old;
-        break;
-        
-        case '-':
-            int i=0;
-            string op;
-            getline(fin, op);
-            while (!op.empty() && (op.back() == '\r' || op.back() == ' ' || op.back() == '\n')) {
-                op.pop_back();
+            fout<<fracs[0].numerator<<"/"<<fracs[0].denominator<<endl;
+        } else {
+            Fraction f1,f2;
+            string frac1, frac2;
+            string frac1de,frac1num, frac2de,frac2num;
+            getline(fin,frac1,',');
+            fin>>frac2;
+            fin.ignore();
+            stringstream frac1_ss(frac1),frac2_ss(frac2);
+            getline(frac1_ss,frac1num, '/');
+            frac1_ss>>frac1de;
+            frac1_ss.ignore();
+            getline(frac2_ss, frac2num, '/');
+            frac2_ss>>frac2de;
+            frac2_ss.ignore();
+            cout<<err++<<endl;
+            f1.denominator = stoi(frac1de);
+            f1.numerator = stoi(frac1num);
+            f2.denominator = stoi(frac2de);
+            f2.numerator = stoi(frac2num);
+            if (op == '>'){
+                fout<<is_greater(f1, f2)<<endl;
+            } else if (op == '='){
+                fout<<is_equal(f1,f2)<<endl;
+            } else {
+                fout<<is_less(f1,f2)<<endl;
             }
-            Fraction old;
-            Fraction fs[6];
-            string fraction;
-            getline(fin,fraction,',');
-            fs[0]=parse_fraction_from_string(fraction);
-            i++;
-            old =fs[0];
-            while (getline(fin, fraction, ',')){
-                fs[i]=parse_fraction_from_string(fraction);
-                old = minus_fraction(old, fs[i++]);
-            }
-            res=old;
-        break;
-        
-        
-        default:
-            break;
         }
     }
 }
 
-Fraction parse_fraction_from_string(string s) {
-    string clean_s = "";
-    for (char c : s) {
-        if (c != ' ' && c != '\r') clean_s += c;
-    }
-    stringstream ss(clean_s);
-    long long num = 0, den = 1;
-    char slash;
-    ss >> num >> slash >> den;
-    return {(int)num, (int)den};
-}
 
 Fraction reduce_fraction(const Fraction& fraction){
     Fraction f=fraction;
